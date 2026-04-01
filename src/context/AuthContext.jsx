@@ -1,31 +1,49 @@
 import { createContext, useState, useEffect } from 'react'
+import { getMe } from '../api/authApi'
+import { login as loginApi, register as registerApi } from '../api/authApi'
 
 export const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
+  const [user, setUser]       = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError]     = useState(null)
 
+  // on first load — verify the stored token is still valid
   useEffect(() => {
-    // check localStorage for an existing token on first load
     const token = localStorage.getItem('token')
-    const savedUser = localStorage.getItem('user')
+    if (!token) {
+      setLoading(false)
+      return
+    }
 
-    if (token && savedUser) {
-      try {
-        setUser(JSON.parse(savedUser))
-      } catch {
+    getMe()
+      .then((res) => {
+        setUser(res.data)
+      })
+      .catch(() => {
+        // token expired or invalid — clear it
         localStorage.removeItem('token')
         localStorage.removeItem('user')
-      }
-    }
-    setLoading(false)
+        setUser(null)
+      })
+      .finally(() => setLoading(false))
   }, [])
 
-  const login = (token, userData) => {
-    localStorage.setItem('token', token)
-    localStorage.setItem('user', JSON.stringify(userData))
-    setUser(userData)
+  const login = async (email, password) => {
+    setError(null)
+    const res = await loginApi({ email, password })
+    localStorage.setItem('token', res.data.token)
+    localStorage.setItem('user', JSON.stringify(res.data.user))
+    setUser(res.data.user)
+  }
+
+  const register = async (name, email, password) => {
+    setError(null)
+    const res = await registerApi({ name, email, password })
+    localStorage.setItem('token', res.data.token)
+    localStorage.setItem('user', JSON.stringify(res.data.user))
+    setUser(res.data.user)
   }
 
   const logout = () => {
@@ -35,7 +53,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, error, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )
