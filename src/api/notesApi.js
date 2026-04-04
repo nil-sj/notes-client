@@ -24,5 +24,8 @@ export const publishNote = (id) =>
 export const approveNote = (id, action) =>
   axiosInstance.patch(`/notes/${id}/approve`, { action })
 
+export const getPendingNotes = (params) =>
+  axiosInstance.get('/admin/pending', { params })
+
 export const deleteNote = (id) =>
   axiosInstance.delete(`/notes/${id}`)
