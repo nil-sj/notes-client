@@ -1,24 +1,19 @@
-import { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { createNote } from '../api/notesApi'
+import { addNote, clearNotesError } from '../store/notesSlice'
 import NoteForm from '../components/notes/NoteForm'
-import styles from './CreateNotePage.module.css'
+import styles   from './CreateNotePage.module.css'
 
 function CreateNotePage() {
+  const dispatch = useDispatch()
   const navigate = useNavigate()
-  const [submitting, setSubmitting] = useState(false)
-  const [error,      setError]      = useState(null)
+  const { loading, error } = useSelector(state => state.notes)
 
   const handleSubmit = async (formData) => {
-    setError(null)
-    setSubmitting(true)
-    try {
-      const res = await createNote(formData)
-      navigate(`/notes/${res.data._id}`)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setSubmitting(false)
+    dispatch(clearNotesError())
+    const result = await dispatch(addNote(formData))
+    if (addNote.fulfilled.match(result)) {
+      navigate(`/notes/${result.payload._id}`)
     }
   }
 
@@ -31,7 +26,7 @@ function CreateNotePage() {
         </div>
         <NoteForm
           onSubmit={handleSubmit}
-          submitting={submitting}
+          submitting={loading}
           error={error}
         />
       </div>

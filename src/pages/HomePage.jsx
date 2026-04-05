@@ -1,48 +1,33 @@
 import { useState, useEffect } from 'react'
-import { getNotes }     from '../api/notesApi'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchNotes } from '../store/notesSlice'
 import { getCategories } from '../api/categoriesApi'
-import NoteCard    from '../components/notes/NoteCard'
+import NoteCard      from '../components/notes/NoteCard'
 import CategoryBadge from '../components/categories/CategoryBadge'
-import Pagination  from '../components/common/Pagination'
-import Spinner     from '../components/common/Spinner'
-import styles      from './HomePage.module.css'
+import Pagination    from '../components/common/Pagination'
+import Spinner       from '../components/common/Spinner'
+import styles        from './HomePage.module.css'
 
 function HomePage() {
-  const [notes,      setNotes]      = useState([])
-  const [categories, setCategories] = useState([])
-  const [pagination, setPagination] = useState(null)
-  const [loading,    setLoading]    = useState(true)
-  const [error,      setError]      = useState(null)
+  const dispatch = useDispatch()
+  const { items: notes, pagination, loading, error } = useSelector(state => state.notes)
 
+  const [categories,       setCategories]       = useState([])
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [selectedTag,      setSelectedTag]      = useState('')
   const [tagInput,         setTagInput]         = useState('')
   const [page,             setPage]             = useState(1)
 
-  // fetch categories once on mount
   useEffect(() => {
-    getCategories()
-      .then(res => setCategories(res.data))
-      .catch(() => {})   // non-critical — filters just won't show
+    getCategories().then(res => setCategories(res.data)).catch(() => {})
   }, [])
 
-  // fetch notes whenever filters or page change
   useEffect(() => {
-    setLoading(true)
-    setError(null)
-
     const params = { page, limit: 9 }
     if (selectedCategory) params.category = selectedCategory
     if (selectedTag)      params.tag      = selectedTag
-
-    getNotes(params)
-      .then(res => {
-        setNotes(res.data.notes)
-        setPagination(res.data.pagination)
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false))
-  }, [page, selectedCategory, selectedTag])
+    dispatch(fetchNotes(params))
+  }, [dispatch, page, selectedCategory, selectedTag])
 
   const handleCategoryClick = (categoryId) => {
     setSelectedCategory(prev => prev === categoryId ? null : categoryId)
@@ -71,7 +56,6 @@ function HomePage() {
         <p>Browse notes shared by the community</p>
       </div>
 
-      {/* filters */}
       <div className={styles.filters}>
         {categories.length > 0 && (
           <div className={styles.categoryFilters}>
@@ -85,7 +69,6 @@ function HomePage() {
             ))}
           </div>
         )}
-
         <form onSubmit={handleTagSearch} className={styles.tagSearch}>
           <input
             type="text"
@@ -96,7 +79,6 @@ function HomePage() {
           />
           <button type="submit" className={styles.tagBtn}>Search</button>
         </form>
-
         {hasActiveFilters && (
           <button onClick={handleClearFilters} className={styles.clearBtn}>
             Clear filters
@@ -104,7 +86,6 @@ function HomePage() {
         )}
       </div>
 
-      {/* active filter indicators */}
       {hasActiveFilters && (
         <div className={styles.activeFilters}>
           {selectedCategory && (
@@ -122,7 +103,6 @@ function HomePage() {
         </div>
       )}
 
-      {/* results */}
       {loading ? (
         <Spinner message="Loading notes..." />
       ) : error ? (

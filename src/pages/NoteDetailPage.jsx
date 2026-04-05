@@ -1,53 +1,32 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { getNoteById, deleteNote, publishNote } from '../api/notesApi'
-import { useAuth } from '../hooks/useAuth'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchNoteById, removeNote, requestPublish, clearCurrentNote } from '../store/notesSlice'
 import Spinner from '../components/common/Spinner'
-import styles from './NoteDetailPage.module.css'
+import styles  from './NoteDetailPage.module.css'
 
 function NoteDetailPage() {
-  const { id }       = useParams()
-  const { user }     = useAuth()
-  const navigate     = useNavigate()
-
-  const [note,    setNote]    = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState(null)
-  const [deleting,  setDeleting]  = useState(false)
-  const [publishing, setPublishing] = useState(false)
+  const { id }     = useParams()
+  const dispatch   = useDispatch()
+  const navigate   = useNavigate()
+  const { currentNote: note, loading, error } = useSelector(state => state.notes)
+  const { user } = useSelector(state => state.auth)
 
   useEffect(() => {
-    setLoading(true)
-    getNoteById(id)
-      .then(res => setNote(res.data))
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false))
-  }, [id])
+    dispatch(fetchNoteById(id))
+    return () => dispatch(clearCurrentNote())
+  }, [dispatch, id])
 
   const isOwner = user && note && user.id === note.createdBy?._id
 
   const handleDelete = async () => {
     if (!window.confirm('Delete this note? This cannot be undone.')) return
-    setDeleting(true)
-    try {
-      await deleteNote(id)
-      navigate('/my-notes')
-    } catch (err) {
-      setError(err.message)
-      setDeleting(false)
-    }
+    const result = await dispatch(removeNote(id))
+    if (removeNote.fulfilled.match(result)) navigate('/my-notes')
   }
 
   const handlePublish = async () => {
-    setPublishing(true)
-    try {
-      const res = await publishNote(id)
-      setNote(res.data.note)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setPublishing(false)
-    }
+    dispatch(requestPublish(id))
   }
 
   const formattedDate = note
@@ -72,11 +51,8 @@ function NoteDetailPage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-
-        {/* back link */}
         <Link to="/" className={styles.backLink}>← Back to notes</Link>
 
-        {/* cover image */}
         {note.imageUrl && (
           <img
             src={`http://localhost:5000${note.imageUrl}`}
@@ -85,7 +61,6 @@ function NoteDetailPage() {
           />
         )}
 
-        {/* header */}
         <div className={styles.header}>
           {note.category && (
             <div className={styles.category}>
@@ -107,8 +82,6 @@ function NoteDetailPage() {
               </span>
             </div>
           )}
-
-          {/* status badge */}
           <span className={`${styles.status} ${styles[note.status]}`}>
             {note.status}
           </span>
@@ -122,18 +95,14 @@ function NoteDetailPage() {
           <span>{formattedDate}</span>
         </div>
 
-        {/* content */}
         {note.content && (
           <div className={styles.content}>
-            {note.content.split('\n').map((para, i) => (
-              para.trim()
-                ? <p key={i}>{para}</p>
-                : <br key={i} />
-            ))}
+            {note.content.split('\n').map((para, i) =>
+              para.trim() ? <p key={i}>{para}</p> : <br key={i} />
+            )}
           </div>
         )}
 
-        {/* tags */}
         {note.tags?.length > 0 && (
           <div className={styles.tags}>
             {note.tags.map(tag => (
@@ -142,42 +111,28 @@ function NoteDetailPage() {
           </div>
         )}
 
-        {/* owner actions */}
         {isOwner && (
           <div className={styles.actions}>
-            <Link
-              to={`/notes/${id}/edit`}
-              className={styles.editBtn}
-            >
+            <Link to={`/notes/${id}/edit`} className={styles.editBtn}>
               Edit note
             </Link>
-
             {note.status === 'private' && (
-              <button
-                onClick={handlePublish}
-                disabled={publishing}
-                className={styles.publishBtn}
-              >
-                {publishing ? 'Submitting...' : 'Request publish'}
+              <button onClick={handlePublish} className={styles.publishBtn}>
+                Request publish
               </button>
             )}
-
             {note.status === 'pending' && (
-              <span className={styles.pendingNote}>
-                Awaiting admin approval
-              </span>
+              <span className={styles.pendingNote}>Awaiting admin approval</span>
             )}
-
             <button
               onClick={handleDelete}
-              disabled={deleting}
+              disabled={loading}
               className={styles.deleteBtn}
             >
-              {deleting ? 'Deleting...' : 'Delete'}
+              {loading ? 'Deleting...' : 'Delete'}
             </button>
           </div>
         )}
-
       </div>
     </div>
   )
