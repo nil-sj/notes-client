@@ -1,45 +1,49 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchMyNotes, removeNote, requestPublish } from '../store/notesSlice'
-import Spinner    from '../components/common/Spinner'
-import Pagination from '../components/common/Pagination'
-import styles     from './MyNotesPage.module.css'
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchMyNotes, removeNote, requestPublish } from "../store/notesSlice";
+import Spinner from "../components/common/Spinner";
+import Pagination from "../components/common/Pagination";
+import styles from "./MyNotesPage.module.css";
 
 const STATUS_FILTERS = [
-  { label: 'All',     value: '' },
-  { label: 'Private', value: 'private' },
-  { label: 'Pending', value: 'pending' },
-  { label: 'Public',  value: 'public' },
-]
+  { label: "All", value: "" },
+  { label: "Private", value: "private" },
+  { label: "Pending", value: "pending" },
+  { label: "Public", value: "public" },
+];
 
 function MyNotesPage() {
-  const dispatch = useDispatch()
-  const { myItems: notes, myPagination: pagination, loading, error } =
-    useSelector(state => state.notes)
+  const dispatch = useDispatch();
+  const {
+    myItems: notes,
+    myPagination: pagination,
+    loading,
+    error,
+  } = useSelector((state) => state.notes);
 
-  const [status, setStatus] = useState('')
-  const [page,   setPage]   = useState(1)
+  const [status, setStatus] = useState("");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
-    const params = { page, limit: 10 }
-    if (status) params.status = status
-    dispatch(fetchMyNotes(params))
-  }, [dispatch, page, status])
+    const params = { page, limit: 10 };
+    if (status) params.status = status;
+    dispatch(fetchMyNotes(params));
+  }, [dispatch, page, status]);
 
   const handleStatusFilter = (value) => {
-    setStatus(value)
-    setPage(1)
-  }
+    setStatus(value);
+    setPage(1);
+  };
 
   const handleDelete = async (id, title) => {
-    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return
-    dispatch(removeNote(id))
-  }
+    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    dispatch(removeNote(id));
+  };
 
   const handlePublish = (id) => {
-    dispatch(requestPublish(id))
-  }
+    dispatch(requestPublish(id));
+  };
 
   return (
     <div className={styles.page}>
@@ -48,14 +52,16 @@ function MyNotesPage() {
           <h1>My notes</h1>
           <p>Manage and publish your notes</p>
         </div>
-        <Link to="/notes/new" className={styles.newBtn}>+ New note</Link>
+        <Link to="/notes/new" className={styles.newBtn}>
+          + New note
+        </Link>
       </div>
 
       <div className={styles.tabs}>
-        {STATUS_FILTERS.map(f => (
+        {STATUS_FILTERS.map((f) => (
           <button
             key={f.value}
-            className={`${styles.tab} ${status === f.value ? styles.activeTab : ''}`}
+            className={`${styles.tab} ${status === f.value ? styles.activeTab : ""}`}
             onClick={() => handleStatusFilter(f.value)}
           >
             {f.label}
@@ -69,13 +75,19 @@ function MyNotesPage() {
         <Spinner message="Loading your notes..." />
       ) : notes.length === 0 ? (
         <div className={styles.empty}>
-          <p>{status ? `No ${status} notes yet.` : "You haven't created any notes yet."}</p>
-          <Link to="/notes/new" className={styles.newBtn}>Create your first note</Link>
+          <p>
+            {status
+              ? `No ${status} notes yet.`
+              : "You haven't created any notes yet."}
+          </p>
+          <Link to="/notes/new" className={styles.newBtn}>
+            Create your first note
+          </Link>
         </div>
       ) : (
         <>
           <div className={styles.list}>
-            {notes.map(note => (
+            {notes.map((note) => (
               <MyNoteRow
                 key={note._id}
                 note={note}
@@ -90,13 +102,15 @@ function MyNotesPage() {
         </>
       )}
     </div>
-  )
+  );
 }
 
 function MyNoteRow({ note, onDelete, onPublish }) {
-  const formattedDate = new Date(note.createdAt).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'short', day: 'numeric'
-  })
+  const formattedDate = new Date(note.createdAt).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 
   return (
     <div className={styles.row}>
@@ -118,24 +132,34 @@ function MyNoteRow({ note, onDelete, onPublish }) {
         </div>
         <div className={styles.rowMeta}>
           {note.category && (
-            <span className={styles.category} style={{ color: note.category.color }}>
+            <span
+              className={styles.category}
+              style={{ color: note.category.color }}
+            >
               {note.category.name}
             </span>
           )}
           {note.tags?.length > 0 && (
-            <span className={styles.tags}>{note.tags.map(t => `#${t}`).join(' ')}</span>
+            <span className={styles.tags}>
+              {note.tags.map((t) => `#${t}`).join(" ")}
+            </span>
           )}
           <span className={styles.date}>{formattedDate}</span>
         </div>
       </div>
       <div className={styles.rowActions}>
-        <Link to={`/notes/${note._id}/edit`} className={styles.editBtn}>Edit</Link>
-        {note.status === 'private' && (
-          <button onClick={() => onPublish(note._id)} className={styles.publishBtn}>
+        <Link to={`/notes/${note._id}/edit`} className={styles.editBtn}>
+          Edit
+        </Link>
+        {note.status === "private" && (
+          <button
+            onClick={() => onPublish(note._id)}
+            className={styles.publishBtn}
+          >
             Publish
           </button>
         )}
-        {note.status === 'pending' && (
+        {note.status === "pending" && (
           <span className={styles.pendingBadge}>Pending review</span>
         )}
         <button
@@ -146,7 +170,7 @@ function MyNoteRow({ note, onDelete, onPublish }) {
         </button>
       </div>
     </div>
-  )
+  );
 }
 
-export default MyNotesPage
+export default MyNotesPage;

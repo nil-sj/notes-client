@@ -1,57 +1,73 @@
-import { useEffect } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchNoteById, removeNote, requestPublish, clearCurrentNote } from '../store/notesSlice'
-import Spinner from '../components/common/Spinner'
-import styles  from './NoteDetailPage.module.css'
+import { useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchNoteById,
+  removeNote,
+  requestPublish,
+  clearCurrentNote,
+} from "../store/notesSlice";
+import Spinner from "../components/common/Spinner";
+import styles from "./NoteDetailPage.module.css";
 
 function NoteDetailPage() {
-  const { id }     = useParams()
-  const dispatch   = useDispatch()
-  const navigate   = useNavigate()
-  const { currentNote: note, loading, error } = useSelector(state => state.notes)
-  const { user } = useSelector(state => state.auth)
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const {
+    currentNote: note,
+    loading,
+    error,
+  } = useSelector((state) => state.notes);
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    dispatch(fetchNoteById(id))
-    return () => dispatch(clearCurrentNote())
-  }, [dispatch, id])
+    dispatch(fetchNoteById(id));
+    return () => dispatch(clearCurrentNote());
+  }, [dispatch, id]);
 
-  const isOwner = user && note && user.id === note.createdBy?._id
+  const isOwner = user && note && user.id === note.createdBy?._id;
 
   const handleDelete = async () => {
-    if (!window.confirm('Delete this note? This cannot be undone.')) return
-    const result = await dispatch(removeNote(id))
-    if (removeNote.fulfilled.match(result)) navigate('/my-notes')
-  }
+    if (!window.confirm("Delete this note? This cannot be undone.")) return;
+    const result = await dispatch(removeNote(id));
+    if (removeNote.fulfilled.match(result)) navigate("/my-notes");
+  };
 
   const handlePublish = async () => {
-    dispatch(requestPublish(id))
-  }
+    dispatch(requestPublish(id));
+  };
 
   const formattedDate = note
-    ? new Date(note.createdAt).toLocaleDateString('en-US', {
-        year: 'numeric', month: 'long', day: 'numeric'
+    ? new Date(note.createdAt).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       })
-    : ''
+    : "";
 
-  if (loading) return <Spinner message="Loading note..." />
+  if (loading) return <Spinner message="Loading note..." />;
 
-  if (error) return (
-    <div className={styles.page}>
-      <div className={styles.error}>
-        <p>{error}</p>
-        <Link to="/" className={styles.backLink}>← Back to home</Link>
+  if (error)
+    return (
+      <div className={styles.page}>
+        <div className={styles.error}>
+          <p>{error}</p>
+          <Link to="/" className={styles.backLink}>
+            ← Back to home
+          </Link>
+        </div>
       </div>
-    </div>
-  )
+    );
 
-  if (!note) return null
+  if (!note) return null;
 
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <Link to="/" className={styles.backLink}>← Back to notes</Link>
+        <Link to="/" className={styles.backLink}>
+          ← Back to notes
+        </Link>
 
         {note.imageUrl && (
           <img
@@ -74,7 +90,7 @@ function NoteDetailPage() {
               <span
                 className={styles.categoryName}
                 style={{
-                  backgroundColor: note.category.color + '22',
+                  backgroundColor: note.category.color + "22",
                   color: note.category.color,
                 }}
               >
@@ -90,23 +106,27 @@ function NoteDetailPage() {
         <h1 className={styles.title}>{note.title}</h1>
 
         <div className={styles.meta}>
-          <span>By {note.createdBy?.name || 'Unknown'}</span>
+          <span>By {note.createdBy?.name || "Unknown"}</span>
           <span className={styles.dot}>·</span>
           <span>{formattedDate}</span>
         </div>
 
         {note.content && (
           <div className={styles.content}>
-            {note.content.split('\n').map((para, i) =>
-              para.trim() ? <p key={i}>{para}</p> : <br key={i} />
-            )}
+            {note.content
+              .split("\n")
+              .map((para, i) =>
+                para.trim() ? <p key={i}>{para}</p> : <br key={i} />,
+              )}
           </div>
         )}
 
         {note.tags?.length > 0 && (
           <div className={styles.tags}>
-            {note.tags.map(tag => (
-              <span key={tag} className={styles.tag}>#{tag}</span>
+            {note.tags.map((tag) => (
+              <span key={tag} className={styles.tag}>
+                #{tag}
+              </span>
             ))}
           </div>
         )}
@@ -116,26 +136,28 @@ function NoteDetailPage() {
             <Link to={`/notes/${id}/edit`} className={styles.editBtn}>
               Edit note
             </Link>
-            {note.status === 'private' && (
+            {note.status === "private" && (
               <button onClick={handlePublish} className={styles.publishBtn}>
                 Request publish
               </button>
             )}
-            {note.status === 'pending' && (
-              <span className={styles.pendingNote}>Awaiting admin approval</span>
+            {note.status === "pending" && (
+              <span className={styles.pendingNote}>
+                Awaiting admin approval
+              </span>
             )}
             <button
               onClick={handleDelete}
               disabled={loading}
               className={styles.deleteBtn}
             >
-              {loading ? 'Deleting...' : 'Delete'}
+              {loading ? "Deleting..." : "Delete"}
             </button>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default NoteDetailPage
+export default NoteDetailPage;
