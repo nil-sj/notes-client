@@ -1,60 +1,51 @@
-import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchNotes } from "../store/notesSlice";
-import { getCategories } from "../api/categoriesApi";
-import NoteCard from "../components/notes/NoteCard";
-import CategoryBadge from "../components/categories/CategoryBadge";
-import Pagination from "../components/common/Pagination";
-import Spinner from "../components/common/Spinner";
-import styles from "./HomePage.module.css";
+import { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchNotes } from '../store/notesSlice'
+import { useGetCategoriesQuery } from '../store/categoriesApi'
+import NoteCard      from '../components/notes/NoteCard'
+import CategoryBadge from '../components/categories/CategoryBadge'
+import Pagination    from '../components/common/Pagination'
+import Spinner       from '../components/common/Spinner'
+import { NoteCardSkeleton } from '../components/common/Skeleton'
+import styles        from './HomePage.module.css'
 
 function HomePage() {
-  const dispatch = useDispatch();
-  const {
-    items: notes,
-    pagination,
-    loading,
-    error,
-  } = useSelector((state) => state.notes);
+  const dispatch = useDispatch()
+  const { items: notes, pagination, loading, error } = useSelector(state => state.notes)
 
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedTag, setSelectedTag] = useState("");
-  const [tagInput, setTagInput] = useState("");
-  const [page, setPage] = useState(1);
+  const { data: categories = [], isLoading: categoriesLoading } = useGetCategoriesQuery()
+
+  const [selectedCategory, setSelectedCategory] = useState(null)
+  const [selectedTag,      setSelectedTag]      = useState('')
+  const [tagInput,         setTagInput]         = useState('')
+  const [page,             setPage]             = useState(1)
 
   useEffect(() => {
-    getCategories()
-      .then((res) => setCategories(res.data))
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    const params = { page, limit: 9 };
-    if (selectedCategory) params.category = selectedCategory;
-    if (selectedTag) params.tag = selectedTag;
-    dispatch(fetchNotes(params));
-  }, [dispatch, page, selectedCategory, selectedTag]);
+    const params = { page, limit: 9 }
+    if (selectedCategory) params.category = selectedCategory
+    if (selectedTag)      params.tag      = selectedTag
+    dispatch(fetchNotes(params))
+  }, [dispatch, page, selectedCategory, selectedTag])
 
   const handleCategoryClick = (categoryId) => {
-    setSelectedCategory((prev) => (prev === categoryId ? null : categoryId));
-    setPage(1);
-  };
+    setSelectedCategory(prev => prev === categoryId ? null : categoryId)
+    setPage(1)
+  }
 
   const handleTagSearch = (e) => {
-    e.preventDefault();
-    setSelectedTag(tagInput.trim().toLowerCase());
-    setPage(1);
-  };
+    e.preventDefault()
+    setSelectedTag(tagInput.trim().toLowerCase())
+    setPage(1)
+  }
 
   const handleClearFilters = () => {
-    setSelectedCategory(null);
-    setSelectedTag("");
-    setTagInput("");
-    setPage(1);
-  };
+    setSelectedCategory(null)
+    setSelectedTag('')
+    setTagInput('')
+    setPage(1)
+  }
 
-  const hasActiveFilters = selectedCategory || selectedTag;
+  const hasActiveFilters = selectedCategory || selectedTag
 
   return (
     <div className={styles.page}>
@@ -63,31 +54,47 @@ function HomePage() {
         <p>Browse notes shared by the community</p>
       </div>
 
+      {/* filters */}
       <div className={styles.filters}>
-        {categories.length > 0 && (
-          <div className={styles.categoryFilters}>
-            {categories.map((cat) => (
+        <div className={styles.categoryFilters}>
+          {categoriesLoading ? (
+            <>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: `${70 + i * 15}px`,
+                    height: '32px',
+                    borderRadius: '99px',
+                    background: '#f0f0f0',
+                    animation: 'shimmer 1.4s ease-in-out infinite',
+                  }}
+                />
+              ))}
+            </>
+          ) : (
+            categories.map(cat => (
               <CategoryBadge
                 key={cat._id}
                 category={cat}
                 selected={selectedCategory === cat._id}
                 onClick={handleCategoryClick}
               />
-            ))}
-          </div>
-        )}
+            ))
+          )}
+        </div>
+
         <form onSubmit={handleTagSearch} className={styles.tagSearch}>
           <input
             type="text"
             value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
+            onChange={e => setTagInput(e.target.value)}
             placeholder="Search by tag..."
             className={styles.tagInput}
           />
-          <button type="submit" className={styles.tagBtn}>
-            Search
-          </button>
+          <button type="submit" className={styles.tagBtn}>Search</button>
         </form>
+
         {hasActiveFilters && (
           <button onClick={handleClearFilters} className={styles.clearBtn}>
             Clear filters
@@ -95,41 +102,31 @@ function HomePage() {
         )}
       </div>
 
+      {/* active filter chips */}
       {hasActiveFilters && (
         <div className={styles.activeFilters}>
           {selectedCategory && (
             <span className={styles.filterChip}>
-              Category:{" "}
-              {categories.find((c) => c._id === selectedCategory)?.name}
-              <button
-                onClick={() => {
-                  setSelectedCategory(null);
-                  setPage(1);
-                }}
-              >
-                ×
-              </button>
+              Category: {categories.find(c => c._id === selectedCategory)?.name}
+              <button onClick={() => { setSelectedCategory(null); setPage(1) }}>×</button>
             </span>
           )}
           {selectedTag && (
             <span className={styles.filterChip}>
               Tag: #{selectedTag}
-              <button
-                onClick={() => {
-                  setSelectedTag("");
-                  setTagInput("");
-                  setPage(1);
-                }}
-              >
-                ×
-              </button>
+              <button onClick={() => { setSelectedTag(''); setTagInput(''); setPage(1) }}>×</button>
             </span>
           )}
         </div>
       )}
 
+      {/* results */}
       {loading ? (
-        <Spinner message="Loading notes..." />
+        <div className={styles.grid}>
+          {Array.from({ length: 9 }).map((_, i) => (
+            <NoteCardSkeleton key={i} />
+          ))}
+        </div>
       ) : error ? (
         <div className={styles.error}>{error}</div>
       ) : notes.length === 0 ? (
@@ -144,7 +141,7 @@ function HomePage() {
       ) : (
         <>
           <div className={styles.grid}>
-            {notes.map((note) => (
+            {notes.map(note => (
               <NoteCard key={note._id} note={note} />
             ))}
           </div>
@@ -154,7 +151,7 @@ function HomePage() {
         </>
       )}
     </div>
-  );
+  )
 }
 
-export default HomePage;
+export default HomePage

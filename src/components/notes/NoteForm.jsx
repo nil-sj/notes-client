@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { getCategories } from '../../api/categoriesApi'
+import { useState } from 'react'
+import { useGetCategoriesQuery } from '../../store/categoriesApi'
 import styles from './NoteForm.module.css'
 
 function NoteForm({ initialData = {}, onSubmit, submitting, error }) {
@@ -9,20 +9,15 @@ function NoteForm({ initialData = {}, onSubmit, submitting, error }) {
     category: initialData.category?._id || initialData.category || '',
     tags:     initialData.tags     || [],
   })
-  const [tagInput,    setTagInput]    = useState('')
-  const [imageFile,   setImageFile]   = useState(null)
-  const [imagePreview,setImagePreview]= useState(
+  const [tagInput,     setTagInput]     = useState('')
+  const [imageFile,    setImageFile]    = useState(null)
+  const [imagePreview, setImagePreview] = useState(
     initialData.imageUrl
       ? `http://localhost:5000${initialData.imageUrl}`
       : null
   )
-  const [categories, setCategories] = useState([])
 
-  useEffect(() => {
-    getCategories()
-      .then(res => setCategories(res.data))
-      .catch(() => {})
-  }, [])
+  const { data: categories = [], isLoading: categoriesLoading } = useGetCategoriesQuery()
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
@@ -59,15 +54,12 @@ function NoteForm({ initialData = {}, onSubmit, submitting, error }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-
-    // build FormData because we may be sending a file
     const data = new FormData()
     data.append('title',    formData.title)
     data.append('content',  formData.content)
     data.append('category', formData.category)
     formData.tags.forEach(tag => data.append('tags', tag))
     if (imageFile) data.append('image', imageFile)
-
     onSubmit(data)
   }
 
@@ -77,7 +69,9 @@ function NoteForm({ initialData = {}, onSubmit, submitting, error }) {
 
       {/* title */}
       <div className={styles.field}>
-        <label htmlFor="title">Title <span className={styles.required}>*</span></label>
+        <label htmlFor="title">
+          Title <span className={styles.required}>*</span>
+        </label>
         <input
           id="title"
           name="title"
@@ -92,19 +86,27 @@ function NoteForm({ initialData = {}, onSubmit, submitting, error }) {
 
       {/* category */}
       <div className={styles.field}>
-        <label htmlFor="category">Category <span className={styles.required}>*</span></label>
-        <select
-          id="category"
-          name="category"
-          value={formData.category}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Select a category</option>
-          {categories.map(cat => (
-            <option key={cat._id} value={cat._id}>{cat.name}</option>
-          ))}
-        </select>
+        <label htmlFor="category">
+          Category <span className={styles.required}>*</span>
+        </label>
+        {categoriesLoading ? (
+          <div className={styles.selectSkeleton} />
+        ) : (
+          <select
+            id="category"
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select a category</option>
+            {categories.map(cat => (
+              <option key={cat._id} value={cat._id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* content */}
@@ -145,7 +147,9 @@ function NoteForm({ initialData = {}, onSubmit, submitting, error }) {
             className={styles.tagTextInput}
           />
         </div>
-        <p className={styles.hint}>Press Enter to add a tag, Backspace to remove the last one</p>
+        <p className={styles.hint}>
+          Press Enter to add a tag, Backspace to remove the last one
+        </p>
       </div>
 
       {/* image */}
@@ -154,7 +158,11 @@ function NoteForm({ initialData = {}, onSubmit, submitting, error }) {
         <div className={styles.imageUpload}>
           {imagePreview ? (
             <div className={styles.imagePreviewWrap}>
-              <img src={imagePreview} alt="Preview" className={styles.imagePreview} />
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className={styles.imagePreview}
+              />
               <button
                 type="button"
                 onClick={() => { setImageFile(null); setImagePreview(null) }}
