@@ -102,3 +102,24 @@
   font-size: 0.8rem;
   color: #aaa;
 }
+
+.card {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+.title {
+  color: var(--text-primary);
+}
+
+.excerpt {
+  color: var(--text-secondary);
+}
+
+.author, .date {
+  color: var(--text-muted);
+}
+
+.footer {
+  border-top-color: var(--border);
+}

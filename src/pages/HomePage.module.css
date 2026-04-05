@@ -152,6 +152,19 @@
   gap: 1.25rem;
 }
 
+.filters {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+.hero h1 {
+  color: var(--text-primary);
+}
+
+.hero p {
+  color: var(--text-secondary);
+}
+
 @media (max-width: 600px) {
   .grid {
     grid-template-columns: 1fr;

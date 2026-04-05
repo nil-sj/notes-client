@@ -85,6 +85,38 @@
   background: #4f46e5;
 }
 
+.themeToggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, background 0.15s;
+  color: var(--text-primary);
+}
+
+.themeToggle:hover {
+  border-color: var(--accent);
+  background: var(--bg-secondary);
+}
+
+.nav {
+  background: var(--bg-card);
+  border-bottom-color: var(--border);
+}
+
+.links a {
+  color: var(--text-secondary);
+}
+
+.username {
+  color: var(--text-secondary);
+}
+
 /* add to existing Navbar.module.css */
 
 @media (max-width: 640px) {

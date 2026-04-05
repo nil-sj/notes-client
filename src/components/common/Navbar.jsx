@@ -1,12 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout } from '../../store/authSlice'
+import { useTheme } from '../../hooks/useTheme'
 import styles from './Navbar.module.css'
 
 function Navbar() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { user } = useSelector(state => state.auth)
+  const { theme, toggleTheme } = useTheme()
 
   const handleLogout = () => {
     dispatch(logout())
@@ -25,14 +27,21 @@ function Navbar() {
           <>
             <Link to="/notes/new">New Note</Link>
             <Link to="/my-notes">My Notes</Link>
-            {user.role === 'admin' && (
-              <Link to="/admin">Admin</Link>
-            )}
+            {user.role === 'admin' && <Link to="/admin">Admin</Link>}
           </>
         )}
       </div>
 
       <div className={styles.auth}>
+        {/* theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className={styles.themeToggle}
+          title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+        >
+          {theme === 'light' ? '☽' : '☀'}
+        </button>
+
         {user ? (
           <>
             <span className={styles.username}>Hi, {user.name}</span>
