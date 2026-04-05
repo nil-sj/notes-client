@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { registerUser, clearAuthError } from '../store/authSlice'
+import toast from 'react-hot-toast'
 import styles from './RegisterPage.module.css'
 
 function RegisterPage() {
@@ -16,13 +17,14 @@ function RegisterPage() {
     if (error) dispatch(clearAuthError())
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    const result = await dispatch(registerUser(formData))
-    if (registerUser.fulfilled.match(result)) {
-      navigate('/')
-    }
+ const handleSubmit = async (e) => {
+  e.preventDefault()
+  const result = await dispatch(loginUser(formData))
+  if (loginUser.fulfilled.match(result)) {
+    toast.success('Welcome back!')
+    navigate('/')
   }
+}
 
   return (
     <div className={styles.container}>

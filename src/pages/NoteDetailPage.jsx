@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import toast from "react-hot-toast";
 import {
   fetchNoteById,
   removeNote,
@@ -31,11 +32,17 @@ function NoteDetailPage() {
   const handleDelete = async () => {
     if (!window.confirm("Delete this note? This cannot be undone.")) return;
     const result = await dispatch(removeNote(id));
-    if (removeNote.fulfilled.match(result)) navigate("/my-notes");
+    if (removeNote.fulfilled.match(result)) {
+      toast.success("Note deleted");
+      navigate("/my-notes");
+    } 
   };
 
   const handlePublish = async () => {
-    dispatch(requestPublish(id));
+    const result = await dispatch(requestPublish(id));
+    if (requestPublish.fulfilled.match(result)) {
+      toast.success("Note submitted for review");
+    }
   };
 
   const formattedDate = note

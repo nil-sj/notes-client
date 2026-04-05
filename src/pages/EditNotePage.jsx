@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import toast from 'react-hot-toast'
 import {
   fetchNoteById,
   editNote,
@@ -30,7 +31,10 @@ function EditNotePage() {
     dispatch(clearNotesError());
     const result = await dispatch(editNote({ id, formData }));
     if (editNote.fulfilled.match(result)) {
+      toast.success('Note updated')
       navigate(`/notes/${id}`);
+    } else {
+      toast.error(result.payload || 'Failed to update note')
     }
   };
 

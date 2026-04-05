@@ -1,28 +1,30 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
-import { loginUser, clearAuthError } from '../store/authSlice'
-import styles from './LoginPage.module.css'
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser, clearAuthError } from "../store/authSlice";
+import toast from "react-hot-toast";
+import styles from "./LoginPage.module.css";
 
 function LoginPage() {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const { loading, error } = useSelector(state => state.auth)
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error } = useSelector((state) => state.auth);
 
-  const [formData, setFormData] = useState({ email: '', password: '' })
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
-    if (error) dispatch(clearAuthError())
-  }
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    if (error) dispatch(clearAuthError());
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    const result = await dispatch(loginUser(formData))
+    e.preventDefault();
+    const result = await dispatch(loginUser(formData));
     if (loginUser.fulfilled.match(result)) {
-      navigate('/')
+      toast.success("Welcome back!");
+      navigate("/");
     }
-  }
+  };
 
   return (
     <div className={styles.container}>
@@ -60,12 +62,8 @@ function LoginPage() {
             />
           </div>
 
-          <button
-            type="submit"
-            className={styles.button}
-            disabled={loading}
-          >
-            {loading ? 'Signing in...' : 'Sign in'}
+          <button type="submit" className={styles.button} disabled={loading}>
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
@@ -74,7 +72,7 @@ function LoginPage() {
         </p>
       </div>
     </div>
-  )
+  );
 }
 
-export default LoginPage
+export default LoginPage;

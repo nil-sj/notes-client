@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMyNotes, removeNote, requestPublish } from "../store/notesSlice";
-import Spinner from "../components/common/Spinner";
 import Pagination from "../components/common/Pagination";
 import { NoteRowSkeleton } from "../components/common/Skeleton";
+import toast from "react-hot-toast";
 import styles from "./MyNotesPage.module.css";
 
 const STATUS_FILTERS = [
@@ -38,12 +38,18 @@ function MyNotesPage() {
   };
 
   const handleDelete = async (id, title) => {
-    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    dispatch(removeNote(id));
+    if (!window.confirm(`Delete "${title}"?`)) return;
+    const result = await dispatch(removeNote(id));
+    if (removeNote.fulfilled.match(result)) {
+      toast.success("Note deleted");
+    }
   };
 
-  const handlePublish = (id) => {
-    dispatch(requestPublish(id));
+  const handlePublish = async (id) => {
+    const result = await dispatch(requestPublish(id));
+    if (requestPublish.fulfilled.match(result)) {
+      toast.success("Note submitted for review");
+    }
   };
 
   return (

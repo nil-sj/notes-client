@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { addNote, clearNotesError } from "../store/notesSlice";
+import toast from 'react-hot-toast'
 import NoteForm from "../components/notes/NoteForm";
 import styles from "./CreateNotePage.module.css";
 
@@ -13,7 +14,10 @@ function CreateNotePage() {
     dispatch(clearNotesError());
     const result = await dispatch(addNote(formData));
     if (addNote.fulfilled.match(result)) {
+      toast.success('Note created successfully')
       navigate(`/notes/${result.payload._id}`);
+    } else {
+      toast.error(result.payload || 'Failed to create note')
     }
   };
 
