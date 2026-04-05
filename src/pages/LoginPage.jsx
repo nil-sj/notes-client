@@ -1,31 +1,26 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { useDispatch, useSelector } from 'react-redux'
+import { loginUser, clearAuthError } from '../store/authSlice'
 import styles from './LoginPage.module.css'
 
 function LoginPage() {
-  const { login } = useAuth()
-  const navigate   = useNavigate()
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { loading, error } = useSelector(state => state.auth)
 
   const [formData, setFormData] = useState({ email: '', password: '' })
-  const [error, setError]       = useState(null)
-  const [loading, setLoading]   = useState(false)
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
+    if (error) dispatch(clearAuthError())
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError(null)
-    setLoading(true)
-    try {
-      await login(formData.email, formData.password)
+    const result = await dispatch(loginUser(formData))
+    if (loginUser.fulfilled.match(result)) {
       navigate('/')
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
     }
   }
 

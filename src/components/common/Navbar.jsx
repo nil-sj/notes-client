@@ -1,13 +1,15 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../hooks/useAuth'
+import { useDispatch, useSelector } from 'react-redux'
+import { logout } from '../store/authSlice'
 import styles from './Navbar.module.css'
 
 function Navbar() {
-  const { user, logout } = useAuth()
-  const navigate          = useNavigate()
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { user } = useSelector(state => state.auth)
 
   const handleLogout = () => {
-    logout()
+    dispatch(logout())
     navigate('/')
   }
 
@@ -19,7 +21,6 @@ function Navbar() {
 
       <div className={styles.links}>
         <Link to="/">Home</Link>
-
         {user && (
           <>
             <Link to="/notes/new">New Note</Link>
