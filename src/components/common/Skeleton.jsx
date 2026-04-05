@@ -13,6 +13,7 @@ function Skeleton({ width, height, borderRadius, className }) {
   )
 }
 
+// pre-built skeleton card that matches NoteCard dimensions
 export function NoteCardSkeleton() {
   return (
     <div className={styles.card}>
@@ -33,6 +34,7 @@ export function NoteCardSkeleton() {
   )
 }
 
+// pre-built skeleton row that matches MyNoteRow dimensions
 export function NoteRowSkeleton() {
   return (
     <div className={styles.row}>

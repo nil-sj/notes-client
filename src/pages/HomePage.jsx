@@ -5,7 +5,6 @@ import { useGetCategoriesQuery } from '../store/categoriesApi'
 import NoteCard      from '../components/notes/NoteCard'
 import CategoryBadge from '../components/categories/CategoryBadge'
 import Pagination    from '../components/common/Pagination'
-import Spinner       from '../components/common/Spinner'
 import { NoteCardSkeleton } from '../components/common/Skeleton'
 import styles        from './HomePage.module.css'
 

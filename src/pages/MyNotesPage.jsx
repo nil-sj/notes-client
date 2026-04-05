@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchMyNotes, removeNote, requestPublish } from "../store/notesSlice";
 import Spinner from "../components/common/Spinner";
 import Pagination from "../components/common/Pagination";
+import { NoteRowSkeleton } from "../components/common/Skeleton";
 import styles from "./MyNotesPage.module.css";
 
 const STATUS_FILTERS = [
@@ -72,17 +73,10 @@ function MyNotesPage() {
       {error && <div className={styles.error}>{error}</div>}
 
       {loading ? (
-        <Spinner message="Loading your notes..." />
-      ) : notes.length === 0 ? (
-        <div className={styles.empty}>
-          <p>
-            {status
-              ? `No ${status} notes yet.`
-              : "You haven't created any notes yet."}
-          </p>
-          <Link to="/notes/new" className={styles.newBtn}>
-            Create your first note
-          </Link>
+        <div className={styles.list}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <NoteRowSkeleton key={i} />
+          ))}
         </div>
       ) : (
         <>
