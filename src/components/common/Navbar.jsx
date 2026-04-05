@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { logout } from '../store/authSlice'
+import { logout } from '../../store/authSlice'
 import styles from './Navbar.module.css'
 
 function Navbar() {
