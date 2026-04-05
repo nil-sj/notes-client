@@ -84,3 +84,33 @@
 .registerBtn:hover {
   background: #4f46e5;
 }
+
+/* add to existing Navbar.module.css */
+
+@media (max-width: 640px) {
+  .nav {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .brand {
+    flex: 1;
+  }
+
+  .links {
+    order: 3;
+    width: 100%;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 0.625rem;
+    gap: 1rem;
+  }
+
+  .auth {
+    margin-left: 0;
+  }
+
+  .username {
+    display: none;
+  }
+}

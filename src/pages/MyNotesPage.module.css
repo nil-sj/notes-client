@@ -264,3 +264,21 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* add at the bottom */
+@media (max-width: 640px) {
+  .row {
+    flex-wrap: wrap;
+  }
+
+  .rowActions {
+    width: 100%;
+    justify-content: flex-end;
+    padding-top: 0.625rem;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .rowTitle {
+    max-width: 200px;
+  }
+}

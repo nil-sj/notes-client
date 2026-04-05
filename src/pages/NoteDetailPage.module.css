@@ -219,3 +219,28 @@
   gap: 1rem;
   align-items: center;
 }
+
+/* add at the bottom */
+@media (max-width: 640px) {
+  .container {
+    padding: 1.25rem;
+  }
+
+  .coverImage {
+    width: calc(100% + 2.5rem);
+    margin: 0 -1.25rem 1.25rem;
+  }
+
+  .title {
+    font-size: 1.375rem;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+  }
+
+  .deleteBtn {
+    margin-left: 0;
+    width: 100%;
+  }
+}
